@@ -52,11 +52,11 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			printf("[E] GetProcAddress failed (%d)\n", GetLastError());
+			printf("[E] GetProcAddress failed (%lu)\n", GetLastError());
 		}
 	}
 	else
 	{
-		printf("[E] LoadLibrary failed (%d)\n", GetLastError());
+		printf("[E] LoadLibrary failed (%lu)\n", GetLastError());
 	}
 }
