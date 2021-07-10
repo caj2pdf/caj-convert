@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-struct ParamList
+typedef struct ParamList
 {
 	long flag[4];
 	char *src;
@@ -12,7 +12,7 @@ struct ParamList
 	char *dest;
 	// Function pointers.
 	void *pfnoss[4];
-};
+} ParamList;
 
 typedef int (*PCAJFILE_DistillPageEx1)(ParamList p);
 
