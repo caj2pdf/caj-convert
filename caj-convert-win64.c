@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 		else
 		{
 #if defined(CAJ2PDF_OS_WINDOWS)
-			printf("[E] GetProcAddress failed (%d)\n", GetLastError());
+			printf("[E] GetProcAddress failed (%lu)\n", GetLastError());
 #elif defined(CAJ2PDF_OS_LINUX)
 			printf("[E] dlsym failed (%s)\n", dlerror());
 #endif
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 		// If the function fails, the return value is zero.
 		if (!FreeLibrary(handle))
 		{
-			printf("[E] FreeLibrary failed (%d)\n", GetLastError());
+			printf("[E] FreeLibrary failed (%lu)\n", GetLastError());
 		}
 #elif defined(CAJ2PDF_OS_LINUX)
 		// On success, dlclose() returns 0; on error, it returns a nonzero value.
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 	else
 	{
 #if defined(CAJ2PDF_OS_WINDOWS)
-		printf("[E] LoadLibrary failed (%d)\n", GetLastError());
+		printf("[E] LoadLibrary failed (%lu)\n", GetLastError());
 #elif defined(CAJ2PDF_OS_LINUX)
 		printf("[E] dlopen failed (%s)\n", dlerror());
 #endif
