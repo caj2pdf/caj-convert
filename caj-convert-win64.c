@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include <Windows.h>
+#include <windows.h>
 
 struct ParamList
 {
