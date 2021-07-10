@@ -21,7 +21,7 @@
 
 #if defined(CAJ2PDF_OS_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
-	#include <Windows.h>
+	#include <windows.h>
 #elif defined(CAJ2PDF_OS_LINUX)
 	#include <dlfcn.h>
 #endif
