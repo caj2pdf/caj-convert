@@ -1,10 +1,34 @@
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include <windows.h>
+// Cross-platform support for Windows & Linux.
+#if !(defined(CAJ2PDF_OS_WINDOWS) || defined(CAJ2PDF_OS_LINUX))
+	#if (defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__))
+		#define CAJ2PDF_OS_WINDOWS
+	#endif
+	#if (defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__))
+		#define CAJ2PDF_OS_LINUX
+	#endif
+#endif
+#if !(defined(CAJ2PDF_OS_WINDOWS) || defined(CAJ2PDF_OS_LINUX))
+	#error unsupported platform
+#endif
+#if defined(CAJ2PDF_OS_WINDOWS) && defined(CAJ2PDF_OS_LINUX)
+	#error conflicting platform definition
+#endif
 
-typedef struct ParamList
+#if defined(CAJ2PDF_OS_WINDOWS)
+	#define WIN32_LEAN_AND_MEAN
+	#include <Windows.h>
+#elif defined(CAJ2PDF_OS_LINUX)
+	#include <dlfcn.h>
+#endif
+
+struct Parameter
 {
-	long flag[4];
+	uint32_t flag[4];
 	char *src;
 	char *extname;
 	// Function pointers for open, read, seek, tell, eof, and close.
@@ -12,35 +36,69 @@ typedef struct ParamList
 	char *dest;
 	// Function pointers.
 	void *pfnoss[4];
-} ParamList;
+};
 
-typedef int (*PCAJFILE_DistillPageEx1)(ParamList p);
+#if defined(CAJ2PDF_OS_LINUX)
+// CAJFILE_Init required on Linux.
+typedef int (*PCAJFILE_Init)(char const *exeDir, char const **, int, char const *tmpDir);
+#endif
+typedef int (*PCAJFILE_DistillPageEx1)(struct Parameter *param);
+
+char src[256], extname[256], dest[256];
 
 int main(int argc, char *argv[])
 {
-	HMODULE hMod = LoadLibrary("ReaderEx_x64.dll");
-	if (hMod)
+#if defined(CAJ2PDF_OS_WINDOWS)
+	HMODULE handle = LoadLibrary(TEXT(".\\ReaderEx_x64.dll"));
+#elif defined(CAJ2PDF_OS_LINUX)
+	void *handle = dlopen("./libreaderex_x64.so", RTLD_LAZY);
+#endif
+	if (handle)
 	{
-		printf("[D] hMod = %8p\n", hMod);
-		PCAJFILE_DistillPageEx1 CAJFILE_DistillPageEx1 = (PCAJFILE_DistillPageEx1)GetProcAddress(hMod, (LPCSTR)216);
+		printf("[D] handle = %p\n", handle);
+#if defined(CAJ2PDF_OS_WINDOWS)
+		PCAJFILE_DistillPageEx1 CAJFILE_DistillPageEx1;
+		// ReaderEx_DIS_C 2.3.0 Build 3982: ordinal value = 216
+		*(void **)(&CAJFILE_DistillPageEx1) = GetProcAddress(handle, (LPCSTR)216);
+#elif defined(CAJ2PDF_OS_LINUX)
+		// CAJFILE_Init required on Linux.
+		PCAJFILE_Init CAJFILE_Init;
+		PCAJFILE_DistillPageEx1 CAJFILE_DistillPageEx1;
+		*(void **)(&CAJFILE_Init) = dlsym(handle, "CAJFILE_Init");
+		if (CAJFILE_Init)
+		{
+			printf("[D] CAJFILE_Init = %p\n", CAJFILE_Init);
+			int result = CAJFILE_Init(".", NULL, 0, "./tmp");
+			if (result)
+			{
+				printf("[E] CAJFILE_Init failed (%d)\n", result);
+				goto cleanup;
+			}
+		}
+		else
+		{
+			printf("[E] dlsym failed (%s)\n", dlerror());
+			goto cleanup;
+		}
+		*(void **)(&CAJFILE_DistillPageEx1) = dlsym(handle, "CAJFILE_DistillPageEx1");
+#endif
 		if (CAJFILE_DistillPageEx1)
 		{
-			printf("[D] CAJFILE_DistillPageEx1 = %8p\n", (void *)CAJFILE_DistillPageEx1);
-			ParamList p;
-			ZeroMemory(&p, sizeof p);
-			p.flag[0] = 0x78;
-			p.flag[3] = 0x26;
-			char src[256], extname[256], dest[256];
+			printf("[D] CAJFILE_DistillPageEx1 = %p\n", CAJFILE_DistillPageEx1);
+			struct Parameter param;
+			memset(&param, 0, sizeof param);
+			param.flag[0] = 0x78;
+			param.flag[3] = 0x26;
 			printf("[?] Source pathname = ");
 			scanf("%s", src);
-			p.src = src;
+			param.src = src;
 			printf("[?] Source extname = ");
 			scanf("%s", extname);
-			p.extname = extname;
+			param.extname = extname;
 			printf("[?] Destination pathname = ");
 			scanf("%s", dest);
-			p.dest = dest;
-			int result = CAJFILE_DistillPageEx1(p);
+			param.dest = dest;
+			int result = CAJFILE_DistillPageEx1(&param);
 			if (result)
 			{
 				printf("[I] Success\n");
@@ -48,15 +106,40 @@ int main(int argc, char *argv[])
 			else
 			{
 				printf("[E] CAJFILE_DistillPageEx1 failed (%d)\n", result);
+				goto cleanup;
 			}
 		}
 		else
 		{
-			printf("[E] GetProcAddress failed (%lu)\n", GetLastError());
+#if defined(CAJ2PDF_OS_WINDOWS)
+			printf("[E] GetProcAddress failed (%d)\n", GetLastError());
+#elif defined(CAJ2PDF_OS_LINUX)
+			printf("[E] dlsym failed (%s)\n", dlerror());
+#endif
+			goto cleanup;
 		}
+	cleanup:
+#if defined(CAJ2PDF_OS_WINDOWS)
+		// If the function succeeds, the return value is nonzero.
+		// If the function fails, the return value is zero.
+		if (!FreeLibrary(handle))
+		{
+			printf("[E] FreeLibrary failed (%d)\n", GetLastError());
+		}
+#elif defined(CAJ2PDF_OS_LINUX)
+		// On success, dlclose() returns 0; on error, it returns a nonzero value.
+		if (dlclose(handle))
+		{
+			printf("[E] dlclose failed (%s)\n", dlerror());
+		}
+#endif
 	}
 	else
 	{
-		printf("[E] LoadLibrary failed (%lu)\n", GetLastError());
+#if defined(CAJ2PDF_OS_WINDOWS)
+		printf("[E] LoadLibrary failed (%d)\n", GetLastError());
+#elif defined(CAJ2PDF_OS_LINUX)
+		printf("[E] dlopen failed (%s)\n", dlerror());
+#endif
 	}
 }
