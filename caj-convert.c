@@ -1,3 +1,16 @@
+/*
+  Code originally posted by Anonymous at https://github.com/caj2pdf/caj2pdf/issues/63 .
+
+  Build instruction - Linux:
+      gcc -Wall caj-convert.c -ldl
+
+  Cross-compile for Windows:
+      x86_64-w64-mingw32- -Wall caj-convert.c
+
+  You need "ReaderEx_x64.dll" or "libreaderex_x64.so" from the official app
+  in the same directory.
+*/
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
