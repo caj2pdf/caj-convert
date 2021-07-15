@@ -8,7 +8,7 @@
       x86_64-w64-mingw32- -Wall caj-convert.c
 
   You need "ReaderEx_x64.dll" or "libreaderex_x64.so" from the official app
-  in the same directory.
+  in the same directory. In some cases, the "Resource" directory is also needed.
 */
 
 #include <stdint.h>
