@@ -4,8 +4,11 @@
   Build instruction - Linux:
       gcc -Wall caj-convert.c -ldl
 
-  Cross-compile for Windows:
-      x86_64-w64-mingw32- -Wall caj-convert.c
+  Cross-compile for 64-bit Windows:
+      x86_64-w64-mingw32-gcc -Wall caj-convert.c
+
+  Cross-compile for 32-bit Windows:
+      i686-w64-mingw32-gcc -Wall caj-convert.c
 
   You need "ReaderEx_x64.dll" or "libreaderex_x64.so" from the official app
   in the same directory. In some cases, the "Resource" directory is also needed.
