@@ -44,7 +44,8 @@
 
 struct Parameter
 {
-	uint32_t flag[4];
+	size_t cb;
+	uint32_t flag[2];
 	char *src;
 	char *extname;
 	// Function pointers for open, read, seek, tell, eof, and close.
@@ -65,7 +66,11 @@ char src[256], extname[256], dest[256];
 int main(int argc, char *argv[])
 {
 #if defined(CAJ2PDF_OS_WINDOWS)
+#ifdef _WIN64
 	HMODULE handle = LoadLibrary(TEXT(".\\ReaderEx_x64.dll"));
+#else
+	HMODULE handle = LoadLibrary(TEXT(".\\ReaderEx.dll"));
+#endif
 #elif defined(CAJ2PDF_OS_LINUX)
 	void *handle = dlopen("./libreaderex_x64.so", RTLD_LAZY);
 #endif
@@ -103,8 +108,8 @@ int main(int argc, char *argv[])
 			printf("[D] CAJFILE_DistillPageEx1 = %p\n", CAJFILE_DistillPageEx1);
 			struct Parameter param;
 			memset(&param, 0, sizeof param);
-			param.flag[0] = 0x78;
-			param.flag[3] = 0x26;
+			param.cb = sizeof param;
+			param.flag[1] = 0x26;
 			printf("[?] Source pathname = ");
 			scanf("%s", src);
 			param.src = src;
