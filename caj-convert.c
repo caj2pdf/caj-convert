@@ -63,6 +63,48 @@ typedef int (*PCAJFILE_DistillPageEx1)(struct Parameter *param);
 
 char src[256], extname[256], dest[256];
 
+FILE *debugopen(const char *pathname, const char *mode)
+{
+	FILE *ret = fopen(pathname, mode);
+	fprintf(stderr, "fopen(pathname = \"%s\", mode = \"%s\") = %p\n", pathname, mode, ret);
+	return ret;
+}
+
+size_t debugread(FILE *stream, void *ptr, size_t size)
+{
+	size_t ret = fread(ptr, size, 1l, stream);
+	fprintf(stderr, "fread(ptr = %p, size = %ld, nmemb = %ld, stream = %p) = %ld\n", ptr, size, 1l, stream, ret);
+	return ret;
+}
+
+int debugseek(FILE *stream, long offset, int whence)
+{
+	int ret = fseek(stream, offset, whence);
+	fprintf(stderr, "fseek(stream = %p, offset = %ld, whence = %d) = %d\n", stream, offset, whence, ret);
+	return ret;
+}
+
+long debugtell(FILE *stream)
+{
+	long ret = ftell(stream);
+	fprintf(stderr, "ftell(stream = %p) = %ld\n", stream, ret);
+	return ret;
+}
+
+int debugeof(FILE *stream)
+{
+	int ret = feof(stream);
+	fprintf(stderr, "feof(stream = %p) = %d\n", stream, ret);
+	return ret;
+}
+
+int debugclose(FILE *stream)
+{
+	int ret = fclose(stream);
+	fprintf(stderr, "fclose(stream = %p) = %d\n", stream, ret);
+	return ret;
+}
+
 int main(int argc, char *argv[])
 {
 #if defined(CAJ2PDF_OS_WINDOWS)
@@ -119,6 +161,14 @@ int main(int argc, char *argv[])
 			printf("[?] Destination pathname = ");
 			scanf("%s", dest);
 			param.dest = dest;
+#ifdef DEBUG
+			param.pfnFILE[0] = debugopen;
+			param.pfnFILE[1] = debugread;
+			param.pfnFILE[2] = debugseek;
+			param.pfnFILE[3] = debugtell;
+			param.pfnFILE[4] = debugeof;
+			param.pfnFILE[5] = debugclose;
+#endif
 			int result = CAJFILE_DistillPageEx1(&param);
 			if (result)
 			{
