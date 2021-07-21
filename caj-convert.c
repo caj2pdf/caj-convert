@@ -73,7 +73,7 @@ FILE *debugopen(const char *pathname, const char *mode)
 size_t debugread(FILE *stream, void *ptr, size_t size)
 {
 	size_t ret = fread(ptr, size, 1l, stream);
-	fprintf(stderr, "fread(ptr = %p, size = %ld, nmemb = %ld, stream = %p) = %ld\n", ptr, size, 1l, stream, ret);
+	fprintf(stderr, "fread(ptr = %p, size = %lu, nmemb = %ld, stream = %p) = %lu\n", ptr, size, 1l, stream, ret);
 	return ret;
 }
 
