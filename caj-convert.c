@@ -61,7 +61,7 @@ typedef int (*PCAJFILE_Init)(char const *exeDir, char const **, int, char const 
 #endif
 typedef int (*PCAJFILE_DistillPageEx1)(struct Parameter *param);
 
-char src[256], extname[256], dest[256];
+char src[4096], extname[256], dest[4096];
 
 FILE *debugopen(const char *pathname, const char *mode)
 {
