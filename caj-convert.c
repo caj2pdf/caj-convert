@@ -152,15 +152,27 @@ int main(int argc, char *argv[])
 			memset(&param, 0, sizeof param);
 			param.cb = sizeof param;
 			param.flag[1] = 0x26;
-			printf("[?] Source pathname = ");
-			scanf("%s", src);
-			param.src = src;
-			printf("[?] Source extname = ");
-			scanf("%s", extname);
-			param.extname = extname;
-			printf("[?] Destination pathname = ");
-			scanf("%s", dest);
-			param.dest = dest;
+			if (argc > 3)
+			{
+				printf("[?] Source pathname = %s\n", argv[1]);
+				param.src = strcpy(src, argv[1]);
+				printf("[?] Source extname = %s\n", argv[3]);
+				param.extname = strcpy(extname, argv[3]);
+				printf("[?] Destination pathname = %s\n", argv[2]);
+				param.dest = strcpy(dest, argv[2]);;
+			}
+			else
+			{
+				printf("[?] Source pathname = ");
+				scanf("%s", src);
+				param.src = src;
+				printf("[?] Source extname = ");
+				scanf("%s", extname);
+				param.extname = extname;
+				printf("[?] Destination pathname = ");
+				scanf("%s", dest);
+				param.dest = dest;
+			}
 #ifdef DEBUG
 			param.pfnFILE[0] = debugopen;
 			param.pfnFILE[1] = debugread;
