@@ -122,6 +122,9 @@ int main(int argc, char *argv[])
 #if defined(CAJ2PDF_OS_WINDOWS)
 		PCAJFILE_DistillPageEx1 CAJFILE_DistillPageEx1;
 		// ReaderEx_DIS_C 2.3.0 Build 3982: ordinal value = 216
+		// 2.0.3949.0 to 2.3.3983.0, 2.3.3982.0 x64 : ordinal value = 216
+		// 2.0.3920.0                            HN : jpeg + jbig2
+		// 2.0.3684.0, 2.0.3799.0                HN : jpeg only
 		*(void **)(&CAJFILE_DistillPageEx1) = GetProcAddress(handle, (LPCSTR)216);
 #elif defined(CAJ2PDF_OS_LINUX)
 		// CAJFILE_Init required on Linux.
