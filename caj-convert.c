@@ -12,6 +12,8 @@
 
   You need "ReaderEx_x64.dll" or "libreaderex_x64.so" from the official app
   in the same directory. In some cases, the "Resource" directory is also needed.
+
+  Issue 90, 4-[21].caj and 4-[24].caj definitely requires extname set to ".caj" to work.
 */
 
 #include <stdint.h>
